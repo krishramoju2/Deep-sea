@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfinityBot - Submarine Control & Deep Sea Analysis</title>
+    <title>DeepSea Explorer - Submarine Control Center</title>
     <style>
         :root {
             --deep-blue: #001f3f;
@@ -15,25 +15,36 @@
             --critical-orange: #ff8800;
         }
         
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Courier New', monospace;
             background-color: var(--deep-blue);
             color: white;
             margin: 0;
             padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             background-image: radial-gradient(circle at center, var(--abyss-blue) 0%, black 100%);
+            overflow: hidden;
         }
         
-        .container {
+        .app-container {
             display: flex;
-            min-height: 100vh;
+            flex: 1;
+            min-height: 0;
         }
         
         .sidebar {
-            width: 250px;
-            background-color: rgba(0, 15, 30, 0.8);
-            padding: 20px;
+            width: 280px;
+            background-color: rgba(0, 15, 30, 0.9);
+            padding: 15px;
             border-right: 1px solid var(--biolum-green);
+            display: flex;
+            flex-direction: column;
             overflow-y: auto;
         }
         
@@ -41,25 +52,79 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         
-        .chat-container {
+        .tab-bar {
+            display: flex;
+            background-color: rgba(0, 10, 20, 0.9);
+            border-bottom: 1px solid var(--biolum-green);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        
+        .tab:hover {
+            background-color: rgba(0, 40, 80, 0.5);
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--biolum-green);
+            background-color: rgba(0, 40, 80, 0.7);
+        }
+        
+        .tab-content {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
+            display: none;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="%2300ffaa" opacity="0.5"/><circle cx="50" cy="30" r="1" fill="%2300ffaa" opacity="0.3"/><circle cx="80" cy="10" r="1" fill="%2300ffaa" opacity="0.7"/><circle cx="10" cy="70" r="1" fill="%2300ffaa" opacity="0.4"/><circle cx="90" cy="80" r="1" fill="%2300ffaa" opacity="0.6"/></svg>');
             background-size: 200px 200px;
         }
         
-        .input-container {
-            padding: 20px;
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-bar {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--biolum-green);
+        }
+        
+        .memory-indicator {
+            color: var(--biolum-green);
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .chat-input-container {
+            padding: 15px;
             background-color: rgba(0, 10, 20, 0.9);
             border-top: 1px solid var(--biolum-green);
         }
         
         textarea {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background-color: rgba(0, 30, 60, 0.7);
             color: white;
             border: 1px solid var(--biolum-green);
@@ -69,7 +134,7 @@
             min-height: 80px;
         }
         
-        .controls {
+        .chat-controls {
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
@@ -96,8 +161,8 @@
         }
         
         .message {
-            margin-bottom: 20px;
-            padding: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
             border-radius: 5px;
             max-width: 80%;
             position: relative;
@@ -121,234 +186,36 @@
             border: 1px solid var(--coral-pink);
         }
         
+        .system-message {
+            background-color: rgba(0, 40, 80, 0.7);
+            margin: 10px auto;
+            border: 1px solid var(--submarine-yellow);
+            text-align: center;
+            max-width: 90%;
+        }
+        
         .timestamp {
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #aaa;
             margin-bottom: 5px;
-        }
-        
-        .personality-selector, .tone-controls {
-            margin-bottom: 20px;
-        }
-        
-        .slider-container {
-            margin-bottom: 10px;
-        }
-        
-        .slider-container label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .slider {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 5px;
-            background: rgba(0, 255, 170, 0.3);
-            border-radius: 5px;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--biolum-green);
-            cursor: pointer;
-        }
-        
-        select {
-            width: 100%;
-            padding: 8px;
-            background-color: rgba(0, 40, 80, 0.7);
-            color: white;
-            border: 1px solid var(--biolum-green);
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .feature-btn {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            text-align: left;
-            background-color: rgba(0, 40, 80, 0.7);
-            color: white;
-        }
-        
-        .feature-btn:hover {
-            background-color: rgba(0, 80, 160, 0.7);
-        }
-        
-        .status-bar {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
-            font-size: 0.8em;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            border-radius: 3px;
-        }
-        
-        .memory-indicator {
-            color: var(--biolum-green);
-        }
-        
-        .performance-stats {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            border: 1px solid var(--biolum-green);
-            z-index: 100;
-        }
-        
-        .screenshot-upload {
-            display: none;
-        }
-        
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid var(--biolum-green);
-            background-color: rgba(0, 10, 20, 0.9);
-        }
-        
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover {
-            background-color: rgba(0, 40, 80, 0.5);
-        }
-        
-        .tab.active {
-            background-color: rgba(0, 40, 80, 0.7);
-            border-color: var(--biolum-green);
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 15px;
-            height: calc(100% - 40px);
-            overflow-y: auto;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .flashcard {
-            background-color: rgba(0, 30, 60, 0.7);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border-left: 5px solid var(--biolum-green);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .flashcard h3 {
-            margin-top: 0;
-            color: var(--biolum-green);
-        }
-        
-        .tool-output {
-            background-color: rgba(0, 20, 40, 0.9);
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border: 1px solid var(--coral-pink);
-        }
-        
-        .warning {
-            color: var(--warning-red);
-            font-weight: bold;
-        }
-        
-        .critical {
-            color: var(--critical-orange);
-            font-weight: bold;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        
-        .data-table th, .data-table td {
-            border: 1px solid var(--biolum-green);
-            padding: 8px;
-            text-align: left;
-        }
-        
-        .data-table th {
-            background-color: rgba(0, 40, 80, 0.7);
-        }
-        
-        .data-table tr:nth-child(even) {
-            background-color: rgba(0, 20, 40, 0.5);
-        }
-        
-        .progress-bar {
-            height: 5px;
-            background-color: rgba(0, 255, 170, 0.3);
-            border-radius: 5px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: var(--biolum-green);
-            width: 0%;
-            transition: width 0.5s;
-        }
-        
-        .tool-animation {
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        #chatWindow {
-            scroll-behavior: smooth;
         }
         
         .sensor-panel {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
         .sensor-card {
             background-color: rgba(0, 30, 60, 0.7);
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
             border-left: 3px solid var(--biolum-green);
         }
         
         .sensor-value {
-            font-size: 1.2em;
+            font-size: 1.3em;
             font-weight: bold;
             color: var(--biolum-green);
         }
@@ -359,27 +226,39 @@
         }
         
         .sensor-status {
-            font-size: 0.7em;
+            font-size: 0.75em;
             margin-top: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
         }
         
         .status-normal {
+            background-color: rgba(0, 255, 0, 0.1);
             color: var(--biolum-green);
         }
         
         .status-warning {
+            background-color: rgba(255, 100, 0, 0.2);
             color: var(--warning-red);
         }
         
         .status-critical {
+            background-color: rgba(255, 0, 0, 0.2);
             color: var(--critical-orange);
+            animation: blink 1s infinite;
         }
         
-        .submarine-controls {
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .control-panel {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-top: 15px;
+            margin: 15px 0;
         }
         
         .control-btn {
@@ -387,10 +266,13 @@
             color: white;
             border: 1px solid var(--biolum-green);
             border-radius: 5px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .control-btn:hover {
@@ -409,21 +291,146 @@
             border-color: var(--critical-orange);
             animation: pulse 1.5s infinite;
         }
+        
+        .data-section {
+            margin-bottom: 20px;
+        }
+        
+        .flashcard {
+            background-color: rgba(0, 30, 60, 0.7);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 5px solid var(--biolum-green);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .flashcard h3 {
+            margin-top: 0;
+            color: var(--biolum-green);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid var(--biolum-green);
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: rgba(0, 40, 80, 0.7);
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: rgba(0, 20, 40, 0.5);
+        }
+        
+        .progress-container {
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(0, 255, 170, 0.3);
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--biolum-green);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .tool-output {
+            background-color: rgba(0, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid var(--coral-pink);
+        }
+        
+        .feature-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            text-align: left;
+            background-color: rgba(0, 40, 80, 0.7);
+            color: white;
+        }
+        
+        .feature-btn:hover {
+            background-color: rgba(0, 80, 160, 0.7);
+        }
+        
+        .performance-stats {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            border: 1px solid var(--biolum-green);
+            z-index: 100;
+        }
+        
+        .screenshot-upload {
+            display: none;
+        }
+        
+        .section-title {
+            color: var(--biolum-green);
+            border-bottom: 1px solid var(--biolum-green);
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .nav-btn {
+            padding: 8px 15px;
+            background-color: rgba(0, 40, 80, 0.7);
+            border: 1px solid var(--biolum-green);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(0, 80, 160, 0.7);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
+        <!-- Sidebar with controls -->
         <div class="sidebar">
-            <h2 style="color: var(--biolum-green);">SUBMARINE CONTROL</h2>
+            <h2 style="color: var(--biolum-green); margin-top: 0;">DEEPSEA EXPLORER</h2>
             <div class="status-bar">
-                <span class="memory-indicator">Infinite Memory Active</span>
+                <span class="memory-indicator">SYSTEMS ONLINE</span>
                 <span id="currentDepth">Depth: 0m</span>
             </div>
             
+            <!-- Sensor Panel -->
+            <div class="section-title">VITAL SENSORS</div>
             <div class="sensor-panel">
                 <div class="sensor-card">
                     <div>External Pressure</div>
-                    <div class="sensor-value" id="pressureValue">0</div>
+                    <div class="sensor-value" id="pressureValue">1.0</div>
                     <div class="sensor-unit">bar</div>
                     <div class="sensor-status status-normal" id="pressureStatus">Normal</div>
                 </div>
@@ -446,8 +453,8 @@
                     <div class="sensor-status status-normal" id="powerStatus">Charged</div>
                 </div>
                 <div class="sensor-card">
-                    <div>Water Temperature</div>
-                    <div class="sensor-value" id="tempValue">4</div>
+                    <div>Water Temp</div>
+                    <div class="sensor-value" id="tempValue">4.0</div>
                     <div class="sensor-unit">°C</div>
                     <div class="sensor-status status-normal" id="tempStatus">Cold</div>
                 </div>
@@ -459,86 +466,218 @@
                 </div>
             </div>
             
-            <div class="submarine-controls">
-                <div class="control-btn" id="ascendBtn">▲ Ascend</div>
-                <div class="control-btn" id="descendBtn">▼ Descend</div>
-                <div class="control-btn" id="stopBtn">◼ Stop</div>
-                <div class="control-btn" id="lightsBtn">💡 Lights</div>
-                <div class="control-btn" id="sonarBtn">📡 Sonar</div>
-                <div class="control-btn" id="camerasBtn">📷 Cameras</div>
-                <div class="control-btn warning" id="ventO2Btn">O₂ Vent</div>
-                <div class="control-btn warning" id="ventCO2Btn">CO₂ Scrub</div>
-                <div class="control-btn critical" id="emergencyBtn">🚨 EMERGENCY</div>
+            <!-- Control Panel -->
+            <div class="section-title">SUBMARINE CONTROLS</div>
+            <div class="control-panel">
+                <div class="control-btn" id="ascendBtn">
+                    <div style="font-size: 1.5em;">▲</div>
+                    <div>Ascend</div>
+                </div>
+                <div class="control-btn" id="descendBtn">
+                    <div style="font-size: 1.5em;">▼</div>
+                    <div>Descend</div>
+                </div>
+                <div class="control-btn" id="stopBtn">
+                    <div style="font-size: 1.5em;">◼</div>
+                    <div>Stop</div>
+                </div>
+                <div class="control-btn" id="lightsBtn">
+                    <div style="font-size: 1.5em;">💡</div>
+                    <div>Lights OFF</div>
+                </div>
+                <div class="control-btn" id="sonarBtn">
+                    <div style="font-size: 1.5em;">📡</div>
+                    <div>Sonar OFF</div>
+                </div>
+                <div class="control-btn" id="camerasBtn">
+                    <div style="font-size: 1.5em;">📷</div>
+                    <div>Cameras OFF</div>
+                </div>
+                <div class="control-btn warning" id="ventO2Btn">
+                    <div style="font-size: 1.5em;">O₂</div>
+                    <div>Vent Oxygen</div>
+                </div>
+                <div class="control-btn warning" id="ventCO2Btn">
+                    <div style="font-size: 1.5em;">CO₂</div>
+                    <div>Scrub CO₂</div>
+                </div>
+                <div class="control-btn critical" id="emergencyBtn">
+                    <div style="font-size: 1.5em;">🚨</div>
+                    <div>EMERGENCY</div>
+                </div>
             </div>
             
-            <div style="margin-top: 20px;">
-                <button class="feature-btn" id="mentalHealthBtn" style="background-color: var(--coral-pink);">Mental Health Check</button>
-            </div>
+            <!-- Navigation Shortcuts -->
+            <div class="section-title">NAVIGATION</div>
+            <button class="feature-btn" id="navChatBtn">Chat Interface</button>
+            <button class="feature-btn" id="navDataBtn">Research Data</button>
+            <button class="feature-btn" id="navToolsBtn">Analysis Tools</button>
+            <button class="feature-btn" id="navLogBtn">Expedition Log</button>
+            
+            <!-- Utilities -->
+            <div class="section-title">UTILITIES</div>
+            <button class="feature-btn" id="mentalHealthBtn" style="background-color: var(--coral-pink);">Mental Health Check</button>
+            <button class="feature-btn" id="helpBtn" style="background-color: var(--biolum-green); color: var(--deep-blue);">Help Guide</button>
         </div>
         
+        <!-- Main Content Area -->
         <div class="main-content">
-            <div class="tab-container">
-                <div class="tab active" data-tab="chat">Chat</div>
+            <!-- Tab Bar -->
+            <div class="tab-bar">
+                <div class="tab active" data-tab="chat">Chat Interface</div>
                 <div class="tab" data-tab="data">Research Data</div>
                 <div class="tab" data-tab="tools">Analysis Tools</div>
                 <div class="tab" data-tab="history">Expedition Log</div>
             </div>
             
+            <!-- Chat Tab -->
             <div class="tab-content active" id="chat">
-                <div class="chat-container" id="chatWindow">
-                    <div class="message bot-message">
-                        <div class="timestamp">SYSTEM INITIALIZED | Depth: 0m</div>
-                        <p>Welcome aboard, Captain. All submarine systems are online and ready for dive operations.</p>
-                        <p>Current systems: <span class="tool-animation">✔ Pressure hull intact</span> | <span class="tool-animation">✔ Life support nominal</span> | <span class="tool-animation">✔ Propulsion ready</span></p>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatWindow">
+                        <div class="message bot-message">
+                            <div class="timestamp">SYSTEM INITIALIZED | Depth: 0m</div>
+                            <p>Welcome aboard, Captain. All submarine systems are online and ready for dive operations.</p>
+                            <p>Current systems: <span class="tool-animation">✔ Pressure hull intact</span> | <span class="tool-animation">✔ Life support nominal</span> | <span class="tool-animation">✔ Propulsion ready</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <textarea id="userInput" placeholder="Enter command or query..."></textarea>
+                        <div class="chat-controls">
+                            <div>
+                                <button id="screenshotBtn">Attach Sonar Image</button>
+                                <input type="file" id="screenshotUpload" class="screenshot-upload" accept="image/*">
+                            </div>
+                            <button id="sendBtn">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Research Data Tab -->
+            <div class="tab-content" id="data">
+                <h2>Live Research Data</h2>
+                
+                <div class="data-section">
+                    <h3 class="section-title">ENVIRONMENTAL READINGS</h3>
+                    <div class="flashcard">
+                        <div id="liveEnvironmentalData">Loading sensor data...</div>
                     </div>
                 </div>
                 
-                <div class="input-container">
-                    <textarea id="userInput" placeholder="Enter command or query..."></textarea>
-                    <div class="controls">
-                        <div>
-                            <button id="screenshotBtn">Attach Sonar/Screenshot</button>
-                            <input type="file" id="screenshotUpload" class="screenshot-upload" accept="image/*">
-                        </div>
-                        <button id="sendBtn">Send</button>
+                <div class="data-section">
+                    <h3 class="section-title">SPECIES OBSERVATIONS</h3>
+                    <div class="flashcard">
+                        <div id="speciesObservations">No species observed yet</div>
                     </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3 class="section-title">EQUIPMENT STATUS</h3>
+                    <div class="flashcard">
+                        <table class="data-table">
+                            <tr>
+                                <th>System</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                            <tr>
+                                <td>Pressure Hull</td>
+                                <td id="hullStatusCell">Optimal</td>
+                                <td id="hullDetails">100% integrity</td>
+                            </tr>
+                            <tr>
+                                <td>Life Support</td>
+                                <td id="lifeSupportStatus">Nominal</td>
+                                <td id="lifeSupportDetails">O₂: 100%, CO₂: 0.3%</td>
+                            </tr>
+                            <tr>
+                                <td>Propulsion</td>
+                                <td id="propulsionStatus">Ready</td>
+                                <td id="propulsionDetails">All thrusters operational</td>
+                            </tr>
+                            <tr>
+                                <td>Power</td>
+                                <td id="powerStatusCell">Charged</td>
+                                <td id="powerDetails">100% remaining</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="dataPrevBtn">Previous</button>
+                    <button class="nav-btn" id="dataNextBtn">Next</button>
                 </div>
             </div>
             
-            <div class="tab-content" id="data">
-                <h2>Live Research Data</h2>
-                <div id="researchDataContent">
-                    <div class="flashcard">
-                        <h3>Environmental Readings</h3>
-                        <div id="liveEnvironmentalData">Loading sensors...</div>
-                    </div>
-                    <div class="flashcard">
-                        <h3>Species Observations</h3>
-                        <div id="speciesObservations">No observations yet</div>
-                    </div>
-                </div>
-            </div>
-            
+            <!-- Analysis Tools Tab -->
             <div class="tab-content" id="tools">
                 <h2>Submarine Analysis Tools</h2>
-                <div id="toolsContent">
-                    <button class="feature-btn" id="ctdBtn">CTD Profiler</button>
-                    <button class="feature-btn" id="rovBtn">ROV Control</button>
-                    <button class="feature-btn" id="sampleBtn">Sample Analysis</button>
-                    <button class="feature-btn" id="navBtn">Navigation Plotter</button>
-                    
-                    <div id="activeToolOutput"></div>
+                
+                <div class="data-section">
+                    <h3 class="section-title">CORE TOOLS</h3>
+                    <div class="flashcard">
+                        <button class="feature-btn" id="ctdBtn">CTD Profiler (Conductivity, Temperature, Depth)</button>
+                        <button class="feature-btn" id="rovBtn">ROV Control Interface</button>
+                        <button class="feature-btn" id="sampleBtn">Sample Analysis Module</button>
+                        <button class="feature-btn" id="navBtn">Navigation Plotter</button>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3 class="section-title">ACTIVE TOOL</h3>
+                    <div id="activeToolOutput">
+                        <div class="flashcard">
+                            <p>No tool currently active. Select a tool from above to begin.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="toolsPrevBtn">Previous</button>
+                    <button class="nav-btn" id="toolsNextBtn">Next</button>
                 </div>
             </div>
             
+            <!-- Expedition Log Tab -->
             <div class="tab-content" id="history">
                 <h2>Expedition Timeline</h2>
-                <div id="historyContent">
+                
+                <div class="data-section">
+                    <h3 class="section-title">CURRENT DIVE</h3>
                     <div class="flashcard">
-                        <h3>Current Dive</h3>
-                        <p id="currentDiveInfo">Starting new dive sequence...</p>
-                        <div class="progress-bar"><div class="progress-fill" id="diveProgress"></div></div>
+                        <div id="currentDiveInfo">Starting new dive sequence...</div>
+                        <div class="progress-container">
+                            <div>Dive Progress:</div>
+                            <div class="progress-bar"><div class="progress-fill" id="diveProgress"></div></div>
+                        </div>
                     </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3 class="section-title">DIVE EVENTS</h3>
+                    <div class="flashcard">
+                        <table class="data-table" id="diveEventsTable">
+                            <tr>
+                                <th>Time</th>
+                                <th>Depth</th>
+                                <th>Event</th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3 class="section-title">DIVE STATISTICS</h3>
+                    <div class="flashcard">
+                        <div id="diveStatistics">Calculating dive statistics...</div>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="historyPrevBtn">Previous</button>
+                    <button class="nav-btn" id="historyNextBtn">Next</button>
                 </div>
             </div>
         </div>
@@ -547,7 +686,7 @@
     <div class="performance-stats">
         <h3>Submarine Status</h3>
         <p>Depth: <span id="statsDepth">0m</span></p>
-        <p>Pressure: <span id="statsPressure">1 atm</span></p>
+        <p>Pressure: <span id="statsPressure">1.0 bar</span></p>
         <p>O₂: <span id="statsO2">100%</span> | CO₂: <span id="statsCO2">0.3%</span></p>
         <p>Power: <span id="statsPower">100%</span></p>
     </div>
@@ -555,6 +694,7 @@
     <script>
         // Global state with live sensor simulation
         const state = {
+            // Submarine systems
             depth: 0,
             pressure: 1,
             hullIntegrity: 100,
@@ -567,21 +707,30 @@
             cameras: false,
             ascending: false,
             descending: false,
+            
+            // Mission data
             diveStartTime: new Date(),
             diveHistory: [],
-            sensorInterval: null,
-            movementInterval: null,
-            persona: 'captain',
+            speciesObserved: [],
             envReadings: {
                 salinity: 35.0,
                 oxygen: 5.2,
                 ph: 8.1,
                 turbidity: 0.2
             },
-            speciesObserved: []
+            
+            // System intervals
+            sensorInterval: null,
+            movementInterval: null,
+            
+            // UI state
+            currentTab: 'chat',
+            dataPage: 1,
+            toolsPage: 1,
+            historyPage: 1
         };
 
-        // Initialize all sensors and controls
+        // Initialize all systems when page loads
         function initSubmarine() {
             // Start sensor updates
             state.sensorInterval = setInterval(updateSensors, 1000);
@@ -589,9 +738,15 @@
             // Initialize controls
             initControls();
             
+            // Initialize navigation
+            initNavigation();
+            
             // Start dive log
             logDiveEvent("Submarine systems initialized");
             updateDiveProgress();
+            
+            // Initial system message
+            addSystemMessage("All systems online and ready for dive operations");
         }
 
         // Update all sensor readings
@@ -620,13 +775,27 @@
                 addSystemMessage("WARNING: Battery power critical!");
             }
             
+            // Update environmental readings
+            updateEnvironmentalReadings();
+            
             // Update displays
             updateSensorDisplays();
             checkWarnings();
+            updateEquipmentStatus();
+        }
+
+        // Update environmental sensor readings
+        function updateEnvironmentalReadings() {
+            // Simulate changing environmental readings
+            state.envReadings.salinity = (35 + (Math.random() - 0.5)).toFixed(1);
+            state.envReadings.oxygen = (5 + (Math.random() - 0.5)).toFixed(1);
+            state.envReadings.ph = (8.1 + (Math.random() - 0.5)).toFixed(1);
+            state.envReadings.turbidity = (0.2 + Math.random() * 0.1).toFixed(1);
         }
 
         // Update all sensor displays
         function updateSensorDisplays() {
+            // Update numeric displays
             document.getElementById('pressureValue').textContent = state.pressure.toFixed(1);
             document.getElementById('hullValue').textContent = Math.floor(state.hullIntegrity);
             document.getElementById('oxygenValue').textContent = Math.floor(state.oxygen);
@@ -634,6 +803,7 @@
             document.getElementById('tempValue').textContent = state.temperature.toFixed(1);
             document.getElementById('co2Value').textContent = state.co2.toFixed(1);
             
+            // Update status bar
             document.getElementById('currentDepth').textContent = `Depth: ${state.depth}m`;
             document.getElementById('statsDepth').textContent = `${state.depth}m`;
             document.getElementById('statsPressure').textContent = `${state.pressure.toFixed(1)} bar`;
@@ -643,6 +813,41 @@
             
             // Update environmental data
             updateEnvironmentalData();
+        }
+
+        // Update environmental data display
+        function updateEnvironmentalData() {
+            document.getElementById('liveEnvironmentalData').innerHTML = `
+                <p><strong>Salinity:</strong> ${state.envReadings.salinity} ppt</p>
+                <p><strong>Oxygen:</strong> ${state.envReadings.oxygen} mg/L</p>
+                <p><strong>pH:</strong> ${state.envReadings.ph}</p>
+                <p><strong>Turbidity:</strong> ${state.envReadings.turbidity} NTU</p>
+                <p><strong>Temperature:</strong> ${state.temperature.toFixed(1)}°C</p>
+                <p><strong>Pressure:</strong> ${state.pressure.toFixed(1)} bar</p>
+            `;
+        }
+
+        // Update equipment status display
+        function updateEquipmentStatus() {
+            document.getElementById('hullStatusCell').textContent = 
+                state.hullIntegrity > 85 ? 'Optimal' : 
+                state.hullIntegrity > 60 ? 'Stressed' : 'CRITICAL';
+            document.getElementById('hullDetails').textContent = `${Math.floor(state.hullIntegrity)}% integrity`;
+            
+            document.getElementById('lifeSupportStatus').textContent = 
+                state.oxygen < 80 || state.co2 > 1 ? 'Warning' : 'Nominal';
+            document.getElementById('lifeSupportDetails').textContent = 
+                `O₂: ${Math.floor(state.oxygen)}%, CO₂: ${state.co2.toFixed(1)}%`;
+            
+            document.getElementById('propulsionStatus').textContent = 
+                state.power < 20 ? 'Limited' : 'Ready';
+            document.getElementById('propulsionDetails').textContent = 
+                state.power < 20 ? 'Power constraints' : 'All thrusters operational';
+            
+            document.getElementById('powerStatusCell').textContent = 
+                state.power > 50 ? 'Charged' : 
+                state.power > 20 ? 'Low' : 'CRITICAL';
+            document.getElementById('powerDetails').textContent = `${Math.floor(state.power)}% remaining`;
         }
 
         // Check for warning conditions
@@ -692,6 +897,13 @@
             } else {
                 setSensorStatus('co2Status', 'normal', 'Safe');
             }
+            
+            // Temperature warnings (just visual, no real danger)
+            if (state.temperature < 2) {
+                setSensorStatus('tempStatus', 'warning', 'Freezing');
+            } else {
+                setSensorStatus('tempStatus', 'normal', 'Cold');
+            }
         }
 
         function setSensorStatus(elementId, status, text) {
@@ -717,8 +929,113 @@
             document.getElementById('ventCO2Btn').addEventListener('click', scrubCO2);
             document.getElementById('emergencyBtn').addEventListener('click', emergencySurface);
             
-            // Other buttons
+            // Chat controls
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Screenshot upload
+            document.getElementById('screenshotBtn').addEventListener('click', () => {
+                document.getElementById('screenshotUpload').click();
+            });
+            
+            document.getElementById('screenshotUpload').addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        addUserMessage("Uploaded sonar image for analysis");
+                        analyzeImage(event.target.result);
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+            
+            // Mental health check
             document.getElementById('mentalHealthBtn').addEventListener('click', mentalHealthCheck);
+            
+            // Help button
+            document.getElementById('helpBtn').addEventListener('click', showHelp);
+        }
+
+        // Initialize navigation
+        function initNavigation() {
+            // Tab navigation
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    state.currentTab = tab.dataset.tab;
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Navigation buttons
+            document.getElementById('navChatBtn').addEventListener('click', () => switchTab('chat'));
+            document.getElementById('navDataBtn').addEventListener('click', () => switchTab('data'));
+            document.getElementById('navToolsBtn').addEventListener('click', () => switchTab('tools'));
+            document.getElementById('navLogBtn').addEventListener('click', () => switchTab('history'));
+            
+            // Data page navigation
+            document.getElementById('dataPrevBtn').addEventListener('click', () => {
+                state.dataPage = Math.max(1, state.dataPage - 1);
+                updateDataPage();
+            });
+            document.getElementById('dataNextBtn').addEventListener('click', () => {
+                state.dataPage = state.dataPage + 1;
+                updateDataPage();
+            });
+            
+            // Tools page navigation
+            document.getElementById('toolsPrevBtn').addEventListener('click', () => {
+                state.toolsPage = Math.max(1, state.toolsPage - 1);
+                updateToolsPage();
+            });
+            document.getElementById('toolsNextBtn').addEventListener('click', () => {
+                state.toolsPage = state.toolsPage + 1;
+                updateToolsPage();
+            });
+            
+            // History page navigation
+            document.getElementById('historyPrevBtn').addEventListener('click', () => {
+                state.historyPage = Math.max(1, state.historyPage - 1);
+                updateHistoryPage();
+            });
+            document.getElementById('historyNextBtn').addEventListener('click', () => {
+                state.historyPage = state.historyPage + 1;
+                updateHistoryPage();
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            state.currentTab = tabName;
+        }
+
+        function updateDataPage() {
+            // In a real implementation, this would load different data sets
+            addSystemMessage(`Loading research data page ${state.dataPage}`);
+        }
+
+        function updateToolsPage() {
+            // In a real implementation, this would show different tools
+            addSystemMessage(`Loading tools page ${state.toolsPage}`);
+        }
+
+        function updateHistoryPage() {
+            // In a real implementation, this would load different history segments
+            addSystemMessage(`Loading history page ${state.historyPage}`);
         }
 
         // Movement functions
@@ -762,19 +1079,22 @@
         // System controls
         function toggleLights() {
             state.lights = !state.lights;
-            document.getElementById('lightsBtn').textContent = state.lights ? "💡 Lights ON" : "💡 Lights OFF";
+            document.getElementById('lightsBtn').querySelector('div:last-child').textContent = 
+                state.lights ? "Lights ON" : "Lights OFF";
             logDiveEvent(`Lights ${state.lights ? 'activated' : 'deactivated'}`);
         }
 
         function toggleSonar() {
             state.sonar = !state.sonar;
-            document.getElementById('sonarBtn').textContent = state.sonar ? "📡 Sonar ACTIVE" : "📡 Sonar OFF";
+            document.getElementById('sonarBtn').querySelector('div:last-child').textContent = 
+                state.sonar ? "Sonar ACTIVE" : "Sonar OFF";
             logDiveEvent(`Sonar ${state.sonar ? 'activated' : 'deactivated'}`);
         }
 
         function toggleCameras() {
             state.cameras = !state.cameras;
-            document.getElementById('camerasBtn').textContent = state.cameras ? "📷 Cameras ON" : "📷 Cameras OFF";
+            document.getElementById('camerasBtn').querySelector('div:last-child').textContent = 
+                state.cameras ? "Cameras ON" : "Cameras OFF";
             logDiveEvent(`Cameras ${state.cameras ? 'activated' : 'deactivated'}`);
         }
 
@@ -782,11 +1102,13 @@
         function ventOxygen() {
             state.oxygen = Math.min(100, state.oxygen + 5);
             logDiveEvent("Oxygen vented into cabin");
+            addSystemMessage("Oxygen levels increased");
         }
 
         function scrubCO2() {
             state.co2 = Math.max(0.3, state.co2 - 0.5);
             logDiveEvent("CO₂ scrubbers activated");
+            addSystemMessage("CO₂ levels reduced");
         }
 
         function emergencySurface() {
@@ -819,58 +1141,54 @@
         }
 
         function updateDiveLog() {
-            const historyContent = document.getElementById('historyContent');
-            historyContent.innerHTML = '';
+            const table = document.getElementById('diveEventsTable');
+            // Clear existing rows (except header)
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
             
-            // Add current dive info
-            const diveTime = Math.floor((new Date() - state.diveStartTime) / 60000);
-            document.getElementById('currentDiveInfo').innerHTML = `
-                Dive started: ${state.diveStartTime.toLocaleTimeString()}<br>
-                Duration: ${diveTime} minutes<br>
-                Max depth: ${Math.max(...state.diveHistory.map(e => e.depth))}m
-            `;
-            
-            // Add progress bar (based on depth)
-            const maxDepth = 1000; // For visualization purposes
-            const progress = Math.min(100, (state.depth / maxDepth) * 100);
-            document.getElementById('diveProgress').style.width = `${progress}%`;
-            
-            // Add recent events
-            const recentEvents = document.createElement('div');
-            recentEvents.className = 'flashcard';
-            recentEvents.innerHTML = '<h3>Recent Events</h3>';
-            
-            const ul = document.createElement('ul');
-            state.diveHistory.slice(-5).reverse().forEach(event => {
-                const li = document.createElement('li');
-                li.textContent = `[${new Date(event.time).toLocaleTimeString()}] ${event.event} (${event.depth}m)`;
-                ul.appendChild(li);
+            // Add recent events (last 10)
+            state.diveHistory.slice(-10).reverse().forEach(event => {
+                const row = table.insertRow(1);
+                row.innerHTML = `
+                    <td>${new Date(event.time).toLocaleTimeString()}</td>
+                    <td>${event.depth}m</td>
+                    <td>${event.event}</td>
+                `;
             });
             
-            recentEvents.appendChild(ul);
-            historyContent.appendChild(recentEvents);
+            // Update dive statistics
+            updateDiveStatistics();
+        }
+
+        function updateDiveStatistics() {
+            const diveTime = Math.floor((new Date() - state.diveStartTime) / 60000);
+            const maxDepth = Math.max(...state.diveHistory.map(e => e.depth));
+            
+            document.getElementById('currentDiveInfo').innerHTML = `
+                <p><strong>Dive started:</strong> ${state.diveStartTime.toLocaleTimeString()}</p>
+                <p><strong>Duration:</strong> ${diveTime} minutes</p>
+                <p><strong>Max depth:</strong> ${maxDepth}m</p>
+                <p><strong>Current depth:</strong> ${state.depth}m</p>
+            `;
+            
+            // Update progress bar (based on depth)
+            const maxDepthForVisualization = 1000; // For visualization purposes
+            const progress = Math.min(100, (state.depth / maxDepthForVisualization) * 100);
+            document.getElementById('diveProgress').style.width = `${progress}%`;
+            
+            // Update statistics card
+            document.getElementById('diveStatistics').innerHTML = `
+                <p><strong>Total events logged:</strong> ${state.diveHistory.length}</p>
+                <p><strong>Species observed:</strong> ${state.speciesObserved.length}</p>
+                <p><strong>Average descent rate:</strong> ${(maxDepth / diveTime).toFixed(1)} m/min</p>
+            `;
         }
 
         function updateDiveProgress() {
             setInterval(() => {
                 updateDiveLog();
             }, 60000); // Update every minute
-        }
-
-        // Environmental data
-        function updateEnvironmentalData() {
-            // Simulate changing environmental readings
-            state.envReadings.salinity = (35 + (Math.random() - 0.5)).toFixed(1);
-            state.envReadings.oxygen = (5 + (Math.random() - 0.5)).toFixed(1);
-            state.envReadings.ph = (8.1 + (Math.random() - 0.5)).toFixed(1);
-            state.envReadings.turbidity = (0.2 + Math.random() * 0.1).toFixed(1);
-            
-            document.getElementById('liveEnvironmentalData').innerHTML = `
-                <p><strong>Salinity:</strong> ${state.envReadings.salinity} ppt</p>
-                <p><strong>Oxygen:</strong> ${state.envReadings.oxygen} mg/L</p>
-                <p><strong>pH:</strong> ${state.envReadings.ph}</p>
-                <p><strong>Turbidity:</strong> ${state.envReadings.turbidity} NTU</p>
-            `;
         }
 
         // Species observation
@@ -919,7 +1237,7 @@
             
             const header = table.createTHead();
             const headerRow = header.insertRow();
-            headerRow.innerHTML = '<th>Species</th><th>Depth</th><th>Time</th>';
+            headerRow.innerHTML = '<th>Species</th><th>Depth</th><th>Time</th><th>Notes</th>';
             
             const body = table.createTBody();
             state.speciesObserved.slice().reverse().forEach(obs => {
@@ -928,21 +1246,35 @@
                     <td>${obs.species}</td>
                     <td>${obs.depth}m</td>
                     <td>${new Date(obs.time).toLocaleTimeString()}</td>
+                    <td>${obs.notes}</td>
                 `;
             });
             
             container.appendChild(table);
         }
 
-        // Chat functionality
-        document.getElementById('sendBtn').addEventListener('click', sendMessage);
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        // Image analysis
+        function analyzeImage(imageData) {
+            // Simulate image analysis
+            setTimeout(() => {
+                const analysisResults = [
+                    "Sonar image processed successfully",
+                    `Detected features at ${state.depth}m depth`,
+                    "Possible biological signatures detected",
+                    "No immediate hazards identified"
+                ];
+                
+                addBotMessage(`
+                    <h3>Sonar Image Analysis</h3>
+                    <ul>
+                        ${analysisResults.map(result => `<li>${result}</li>`).join('')}
+                    </ul>
+                    <img src="${imageData}" style="max-width: 100%; margin-top: 10px; border: 1px solid var(--biolum-green);">
+                `);
+            }, 2000);
+        }
 
+        // Chat functionality
         function sendMessage() {
             const userInput = document.getElementById('userInput');
             const message = userInput.value.trim();
@@ -976,7 +1308,7 @@
         function addSystemMessage(text) {
             const chatWindow = document.getElementById('chatWindow');
             const message = document.createElement('div');
-            message.className = 'message bot-message';
+            message.className = 'message system-message';
             message.innerHTML = `
                 <div class="timestamp">SYSTEM | ${new Date().toLocaleTimeString()}</div>
                 <p>${text}</p>
@@ -1007,6 +1339,17 @@
                           - Sonar: ${state.sonar ? 'ACTIVE' : 'OFF'}<br>
                           - Cameras: ${state.cameras ? 'ON' : 'OFF'}<br>
                           - Power: ${state.power.toFixed(0)}% remaining`,
+                environment: `Current water conditions:<br>
+                              - Temperature: ${state.temperature.toFixed(1)}°C<br>
+                              - Salinity: ${state.envReadings.salinity} ppt<br>
+                              - Oxygen: ${state.envReadings.oxygen} mg/L<br>
+                              - pH: ${state.envReadings.ph}`,
+                species: state.speciesObserved.length > 0 ? 
+                    `Observed species:<br><ul>${
+                        state.speciesObserved.map(s => 
+                            `<li>${s.species} at ${s.depth}m</li>`
+                        ).join('')
+                    }</ul>` : "No marine life observed yet. Try descending deeper.",
                 help: `Available commands:<br>
                        - "status" - Current submarine status<br>
                        - "depth" - Current depth and pressure<br>
@@ -1028,21 +1371,15 @@
             } else if (lowerQuery.includes('help') || lowerQuery.includes('command')) {
                 response = responses.help;
             } else if (lowerQuery.includes('environment') || lowerQuery.includes('water')) {
-                response = `Current water conditions:<br>
-                            - Temperature: ${state.temperature.toFixed(1)}°C<br>
-                            - Salinity: ${state.envReadings.salinity} ppt<br>
-                            - Oxygen: ${state.envReadings.oxygen} mg/L<br>
-                            - pH: ${state.envReadings.ph}`;
+                response = responses.environment;
             } else if (lowerQuery.includes('species') || lowerQuery.includes('fish') || lowerQuery.includes('life')) {
-                if (state.speciesObserved.length > 0) {
-                    response = `Observed species:<br><ul>${
-                        state.speciesObserved.map(s => 
-                            `<li>${s.species} at ${s.depth}m</li>`
-                        ).join('')
-                    }</ul>`;
-                } else {
-                    response = "No marine life observed yet. Try descending deeper.";
-                }
+                response = responses.species;
+            } else if (lowerQuery.includes('emergency')) {
+                response = `EMERGENCY PROCEDURES:<br>
+                           1. Press the EMERGENCY SURFACE button<br>
+                           2. Secure all loose items<br>
+                           3. Prepare for rapid ascent<br>
+                           4. Monitor hull integrity during ascent`;
             } else {
                 response = responses.default;
             }
@@ -1065,6 +1402,25 @@
                     <p>Remember: It's normal to feel overwhelmed during extended deep sea missions.</p>
                 `);
             }, 800);
+        }
+
+        // Help guide
+        function showHelp() {
+            switchTab('chat');
+            addBotMessage(`
+                <h3>DeepSea Explorer Help Guide</h3>
+                <p><strong>Control Panel:</strong> All submarine controls are in the left sidebar</p>
+                <p><strong>Navigation:</strong> Use the tabs at top or sidebar buttons to switch sections</p>
+                <p><strong>Chat Commands:</strong></p>
+                <ul>
+                    <li>"status" - Current submarine systems</li>
+                    <li>"depth" - Current depth and pressure</li>
+                    <li>"environment" - Water conditions</li>
+                    <li>"species" - Observed marine life</li>
+                    <li>"emergency" - Emergency procedures</li>
+                </ul>
+                <p><strong>Emergency:</strong> Press the red EMERGENCY button for rapid surface</p>
+            `);
         }
 
         // Initialize the submarine when page loads
