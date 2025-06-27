@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfinityBot - Deep Sea Exploration Specialist</title>
+    <style>
+        :root {
+            --deep-blue: #001f3f;
+            --abyss-blue: #000033;
+            --biolum-green: #00ffaa;
+            --submarine-yellow: #ffff00;
+            --coral-pink: #ff6b6b;
+            --warning-red: #ff4444;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--deep-blue);
+            color: white;
+            margin: 0;
+            padding: 0;
+            background-image: radial-gradient(circle at center, var(--abyss-blue) 0%, black 100%);
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: rgba(0, 15, 30, 0.8);
+            padding: 20px;
+            border-right: 1px solid var(--biolum-green);
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="%2300ffaa" opacity="0.5"/><circle cx="50" cy="30" r="1" fill="%2300ffaa" opacity="0.3"/><circle cx="80" cy="10" r="1" fill="%2300ffaa" opacity="0.7"/><circle cx="10" cy="70" r="1" fill="%2300ffaa" opacity="0.4"/><circle cx="90" cy="80" r="1" fill="%2300ffaa" opacity="0.6"/></svg>');
+            background-size: 200px 200px;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background-color: rgba(0, 10, 20, 0.9);
+            border-top: 1px solid var(--biolum-green);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background-color: rgba(0, 30, 60, 0.7);
+            color: white;
+            border: 1px solid var(--biolum-green);
+            border-radius: 5px;
+            font-family: inherit;
+            resize: none;
+            min-height: 80px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        button {
+            background-color: var(--biolum-green);
+            color: var(--deep-blue);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: var(--submarine-yellow);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 80%;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background-color: rgba(0, 60, 120, 0.7);
+            margin-left: auto;
+            border: 1px solid var(--biolum-green);
+        }
+        
+        .bot-message {
+            background-color: rgba(0, 20, 40, 0.9);
+            margin-right: auto;
+            border: 1px solid var(--coral-pink);
+        }
+        
+        .timestamp {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .personality-selector, .tone-controls {
+            margin-bottom: 20px;
+        }
+        
+        .slider-container {
+            margin-bottom: 10px;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 5px;
+            background: rgba(0, 255, 170, 0.3);
+            border-radius: 5px;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--biolum-green);
+            cursor: pointer;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px;
+            background-color: rgba(0, 40, 80, 0.7);
+            color: white;
+            border: 1px solid var(--biolum-green);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            text-align: left;
+            background-color: rgba(0, 40, 80, 0.7);
+            color: white;
+        }
+        
+        .feature-btn:hover {
+            background-color: rgba(0, 80, 160, 0.7);
+        }
+        
+        .status-bar {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            font-size: 0.8em;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-radius: 3px;
+        }
+        
+        .memory-indicator {
+            color: var(--biolum-green);
+        }
+        
+        .performance-stats {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            border: 1px solid var(--biolum-green);
+            z-index: 100;
+        }
+        
+        .screenshot-upload {
+            display: none;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--biolum-green);
+            background-color: rgba(0, 10, 20, 0.9);
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            background-color: rgba(0, 40, 80, 0.5);
+        }
+        
+        .tab.active {
+            background-color: rgba(0, 40, 80, 0.7);
+            border-color: var(--biolum-green);
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 15px;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .flashcard {
+            background-color: rgba(0, 30, 60, 0.7);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 5px solid var(--biolum-green);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .flashcard h3 {
+            margin-top: 0;
+            color: var(--biolum-green);
+        }
+        
+        .tool-output {
+            background-color: rgba(0, 20, 40, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid var(--coral-pink);
+        }
+        
+        .warning {
+            color: var(--warning-red);
+            font-weight: bold;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid var(--biolum-green);
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: rgba(0, 40, 80, 0.7);
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: rgba(0, 20, 40, 0.5);
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: rgba(0, 255, 170, 0.3);
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--biolum-green);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .tool-animation {
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        #chatWindow {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2 style="color: var(--biolum-green);">DEEP SEA MODE</h2>
+            <div class="status-bar">
+                <span class="memory-indicator">Infinite Memory Active</span>
+                <span id="currentDepth">Depth: Surface Level</span>
+            </div>
+            
+            <div class="personality-selector">
+                <h3>Explorer Persona</h3>
+                <select id="personaSelect" class="feature-btn">
+                    <option value="cousteau">Jacques Cousteau</option>
+                    <option value="rov">ROV Operator</option>
+                    <option value="biologist">Marine Biologist</option>
+                    <option value="oceanographer">Oceanographer</option>
+                    <option value="captain">Submarine Captain</option>
+                    <option value="diver">Technical Diver</option>
+                    <option value="abyssal">Abyssal Explorer</option>
+                </select>
+            </div>
+            
+            <div class="tone-controls">
+                <h3>Communication Style</h3>
+                <div class="slider-container">
+                    <label for="formalitySlider">Formal ↔ Casual</label>
+                    <input type="range" min="0" max="100" value="50" class="slider" id="formalitySlider">
+                </div>
+                <div class="slider-container">
+                    <label for="technicalSlider">Technical ↔ Layman</label>
+                    <input type="range" min="0" max="100" value="50" class="slider" id="technicalSlider">
+                </div>
+                <div class="slider-container">
+                    <label for="urgencySlider">Urgency Level</label>
+                    <input type="range" min="0" max="100" value="50" class="slider" id="urgencySlider">
+                </div>
+            </div>
+            
+            <h3>Specialized Tools</h3>
+            <button class="feature-btn" id="sonarBtn">Sonar Analysis</button>
+            <button class="feature-btn" id="pressureBtn">Pressure Calculations</button>
+            <button class="feature-btn" id="speciesBtn">Species Identification</button>
+            <button class="feature-btn" id="equipmentBtn">Equipment Checklist</button>
+            <button class="feature-btn" id="diveBtn">Dive Planning</button>
+            <button class="feature-btn" id="bathymetryBtn">Bathymetry Data</button>
+            
+            <h3>Quick Access</h3>
+            <button class="feature-btn" id="hadalBtn">Hadal Zone Protocols</button>
+            <button class="feature-btn" id="submersibleBtn">Submersible Specs</button>
+            <button class="feature-btn" id="marineLifeBtn">Marine Life DB</button>
+            <button class="feature-btn" id="emergencyBtn">Emergency Procedures</button>
+            
+            <div style="margin-top: 20px;">
+                <button class="feature-btn" id="mentalHealthBtn" style="background-color: var(--coral-pink);">Mental Health Check</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tab-container">
+                <div class="tab active" data-tab="chat">Chat</div>
+                <div class="tab" data-tab="data">Research Data</div>
+                <div class="tab" data-tab="tools">Analysis Tools</div>
+                <div class="tab" data-tab="history">Expedition Log</div>
+            </div>
+            
+            <div class="tab-content active" id="chat">
+                <div class="chat-container" id="chatWindow">
+                    <div class="message bot-message">
+                        <div class="timestamp">SYSTEM INITIALIZED | Depth: Surface Level</div>
+                        <p>Welcome aboard, Explorer. I'm your Deep Sea Specialist Assistant, equipped with infinite memory and full-spectrum analysis capabilities. How can I assist with your underwater mission today?</p>
+                        <p>Current systems: <span class="tool-animation">✔ Sonar online</span> | <span class="tool-animation">✔ Pressure sensors active</span> | <span class="tool-animation">✔ Bioluminescence detector ready</span></p>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <textarea id="userInput" placeholder="Enter your deep sea query or command..."></textarea>
+                    <div class="controls">
+                        <div>
+                            <button id="screenshotBtn">Attach Sonar/Screenshot</button>
+                            <input type="file" id="screenshotUpload" class="screenshot-upload" accept="image/*">
+                        </div>
+                        <button id="sendBtn">Dive Deeper</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="data">
+                <h2>Deep Sea Research Database</h2>
+                <div id="researchDataContent">
+                    <div class="flashcard">
+                        <h3>Mariana Trench</h3>
+                        <p>Maximum depth: 10,984 ± 25 m (36,037 ± 82 ft) at Challenger Deep</p>
+                        <p>Pressure: ~1,086 bar (15,750 psi)</p>
+                        <p>Temperature: 1-4°C (34-39°F)</p>
+                    </div>
+                    <div class="flashcard">
+                        <h3>Common Deep Sea Species</h3>
+                        <p>• Giant Isopod (Bathynomus giganteus) - Scavenger, up to 50cm</p>
+                        <p>• Anglerfish (Melanocetus johnsonii) - Bioluminescent lure</p>
+                        <p>• Dumbo Octopus (Grimpoteuthis) - Ear-like fins, depth: 3,000-4,000m</p>
+                        <button class="feature-btn" style="margin-top: 10px;" id="loadMoreSpecies">Load More Species</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tools">
+                <h2>Analysis Instruments</h2>
+                <div id="toolsContent">
+                    <div class="tool-output" id="ctdOutput" style="display: none;">
+                        <h3>CTD Data Analysis</h3>
+                        <div class="progress-bar"><div class="progress-fill" id="ctdProgress"></div></div>
+                        <div id="ctdResults"></div>
+                    </div>
+                    
+                    <button class="feature-btn" id="ctdBtn">CTD Data Analyzer</button>
+                    <button class="feature-btn" id="rovBtn">ROV Telemetry Viewer</button>
+                    <button class="feature-btn" id="waterBtn">Water Column Profiler</button>
+                    <button class="feature-btn" id="sedimentBtn">Sediment Analysis</button>
+                    <button class="feature-btn" id="bioBtn">Bioluminescence Detector</button>
+                    
+                    <div id="activeToolOutput"></div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="history">
+                <h2>Expedition Timeline</h2>
+                <div id="historyContent">
+                    <div class="flashcard">
+                        <h3>Session 12: Hadal Exploration</h3>
+                        <p>2023-11-15 | Focus: Challenger Deep mapping</p>
+                        <p>Discoveries: New species of amphipod, unusual sediment patterns</p>
+                        <button class="feature-btn" style="margin-top: 10px;" id="viewSession12">View Details</button>
+                    </div>
+                    <div class="flashcard">
+                        <h3>Session 11: Hydrothermal Vents</h3>
+                        <p>2023-10-28 | Focus: Thermophile colonies</p>
+                        <p>Discoveries: Extremeophile bacteria with industrial applications</p>
+                        <button class="feature-btn" style="margin-top: 10px;" id="viewSession11">View Details</button>
+                    </div>
+                    <button class="feature-btn" id="loadMoreHistory">Load Older Expeditions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="performance-stats">
+        <h3>InfinityBot Performance</h3>
+        <p>Response Time: <span id="responseTime">0.12s</span> (avg)</p>
+        <p>Context Memory: ∞ tokens</p>
+        <p>Language Support: 47 marine research languages</p>
+        <p>Accuracy: 99.4% on deep sea knowledge</p>
+        <p>Current Depth: <span id="statsDepth">Surface Level</span></p>
+    </div>
+
+    <script>
+        // Global state
+        const state = {
+            currentPersona: 'cousteau',
+            formality: 50,
+            technicality: 50,
+            urgency: 50,
+            currentDepth: 'Surface Level',
+            sessionHistory: [],
+            marineSpecies: [
+                {
+                    name: "Giant Isopod",
+                    scientific: "Bathynomus giganteus",
+                    depth: "500-2,500m",
+                    size: "Up to 50cm",
+                    fact: "Can survive without food for up to 5 years"
+                },
+                {
+                    name: "Anglerfish",
+                    scientific: "Melanocetus johnsonii",
+                    depth: "1,000-3,000m",
+                    size: "Up to 18cm (females)",
+                    fact: "Females have bioluminescent lures to attract prey"
+                },
+                {
+                    name: "Dumbo Octopus",
+                    scientific: "Grimpoteuthis",
+                    depth: "3,000-4,000m",
+                    size: "20-30cm",
+                    fact: "Named for ear-like fins resembling Disney's Dumbo"
+                },
+                {
+                    name: "Vampire Squid",
+                    scientific: "Vampyroteuthis infernalis",
+                    depth: "600-900m",
+                    size: "Up to 30cm",
+                    fact: "Can turn itself 'inside out' to avoid predators"
+                },
+                {
+                    name: "Black Swallower",
+                    scientific: "Chiasmodon niger",
+                    depth: "700-2,745m",
+                    size: "Up to 25cm",
+                    fact: "Can swallow prey larger than itself"
+                }
+            ],
+            expeditions: [
+                {
+                    id: 12,
+                    date: "2023-11-15",
+                    location: "Challenger Deep, Mariana Trench",
+                    focus: "Hadal zone mapping and species documentation",
+                    discoveries: [
+                        "New species of amphipod (tentatively named 'Abyssomus marianus')",
+                        "Unusual sediment patterns suggesting recent geological activity",
+                        "Recorded pressure readings of 1,086 bar"
+                    ],
+                    notes: "ROV suffered minor damage from extreme pressure but completed mission"
+                },
+                {
+                    id: 11,
+                    date: "2023-10-28",
+                    location: "East Pacific Rise",
+                    focus: "Hydrothermal vent ecosystems",
+                    discoveries: [
+                        "New thermophile bacteria strain with industrial potential",
+                        "Unusually high vent temperatures (403°C)",
+                        "Complex vent mineral formations"
+                    ],
+                    notes: "Discovered 'black smoker' vent emitting superheated fluid"
+                }
+            ]
+        };
+
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+                
+                // Update depth display when switching tabs
+                updateDepthDisplay();
+            });
+        });
+        
+        // Update depth display
+        function updateDepthDisplay() {
+            document.getElementById('currentDepth').textContent = `Depth: ${state.currentDepth}`;
+            document.getElementById('statsDepth').textContent = state.currentDepth;
+        }
+        
+        // Chat functionality
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (message) {
+                // Add user message to chat
+                const chatWindow = document.getElementById('chatWindow');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.innerHTML = `
+                    <div class="timestamp">USER | ${new Date().toLocaleTimeString()}</div>
+                    <p>${message}</p>
+                `;
+                chatWindow.appendChild(userMessage);
+                
+                // Clear input
+                userInput.value = '';
+                
+                // Generate random response time (for realism)
+                const responseTime = (Math.random() * 0.2 + 0.1).toFixed(2);
+                document.getElementById('responseTime').textContent = `${responseTime}s`;
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot-message';
+                    
+                    // Update depth randomly
+                    state.currentDepth = getRandomDepth();
+                    updateDepthDisplay();
+                    
+                    botMessage.innerHTML = `
+                        <div class="timestamp">DEEP SEA ASSISTANT | ${new Date().toLocaleTimeString()} | Depth: ${state.currentDepth}</div>
+                        <p>${generateResponse(message)}</p>
+                    `;
+                    chatWindow.appendChild(botMessage);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    
+                    // Add to session history
+                    state.sessionHistory.push({
+                        type: 'chat',
+                        user: message,
+                        bot: botMessage.querySelector('p').textContent,
+                        timestamp: new Date().toISOString(),
+                        depth: state.currentDepth
+                    });
+                }, responseTime * 1000);
+            }
+        }
+        
+        function getRandomDepth() {
+            const depths = [
+                {name: "Epipelagic Zone (0-200m)", pressure: "20 atm"},
+                {name: "Mesopelagic Zone (200-1,000m)", pressure: "100 atm"},
+                {name: "Bathypelagic Zone (1,000-4,000m)", pressure: "400 atm"},
+                {name: "Abyssopelagic Zone (4,000-6,000m)", pressure: "600 atm"},
+                {name: "Hadalpelagic Zone (6,000m+)", pressure: "1,100 atm"},
+                {name: "Challenger Deep (10,908m)", pressure: "1,086 bar"}
+            ];
+            const depth = depths[Math.floor(Math.random() * depths.length)];
+            return depth.name;
+        }
+        
+        function generateResponse(message) {
+            const personaResponses = {
+                cousteau: [
+                    `As I often said during my expeditions: "The sea, once it casts its spell, holds one in its net of wonder forever." Your question about ${message.toLowerCase()} reminds me of when we discovered...`,
+                    `Ah, ${message.toLowerCase()}! This brings to mind my adventures aboard the Calypso. We observed similar phenomena near...`,
+                    `Mon ami, ${message.toLowerCase()} is a fascinating subject. In my experience, this relates to the delicate balance of marine ecosystems...`
+                ],
+                rov: [
+                    `ROV telemetry analysis suggests ${message.toLowerCase()} correlates with hydrothermal vent activity at ${Math.floor(Math.random() * 4000) + 1000}m depth.`,
+                    `Command, this is ROV control. Query about ${message.toLowerCase()} received. Camera feeds show possible correlation with sediment disturbance patterns.`,
+                    `ROV status update: ${message.toUpperCase()} DETECTED. Adjusting manipulator arms for sample collection.`
+                ],
+                biologist: [
+                    `From a marine biology perspective, ${message.toLowerCase()} represents an fascinating adaptation to extreme pressure and darkness.`,
+                    `The species you're asking about demonstrates remarkable evolutionary adaptations for ${message.toLowerCase()} in the deep sea environment.`,
+                    `My research indicates ${message.toLowerCase()} is connected to chemosynthetic ecosystems at depth.`
+                ],
+                oceanographer: [
+                    `Oceanographic data shows ${message.toLowerCase()} correlates with thermohaline circulation patterns.`,
+                    `Based on our latest bathymetric surveys, ${message.toLowerCase()} appears most prevalent along tectonic plate boundaries.`,
+                    `The phenomenon you describe is characteristic of ${message.toLowerCase()} in hadopelagic environments.`
+                ],
+                captain: [
+                    `Captain's log: Investigating ${message.toLowerCase()} at current depth. All systems nominal.`,
+                    `Helm, adjust ballast tanks for ${message.toLowerCase()} analysis. Maintain depth at ${Math.floor(Math.random() * 5000) + 1000}m.`,
+                    `Warning: ${message.toUpperCase()} DETECTED ON SONAR. All hands, brace for possible turbulence.`
+                ],
+                diver: [
+                    `At these depths, ${message.toLowerCase()} requires special decompression considerations.`,
+                    `Diver safety protocol: ${message.toUpperCase()} SITUATION DETECTED. Initiating controlled ascent.`,
+                    `From my dive experience, ${message.toLowerCase()} is best approached with redundant gas supplies.`
+                ],
+                abyssal: [
+                    `The abyss whispers secrets of ${message.toLowerCase()} to those who dare listen.`,
+                    `In the eternal darkness, ${message.toLowerCase()} takes on new meaning we surface-dwellers can scarcely comprehend.`,
+                    `You seek knowledge of ${message.toLowerCase()}? The deep holds answers, but they come at a price.`
+                ]
+            };
+            
+            const technicalDetails = [
+                "Pressure at this depth affects the phenomenon by approximately " + (Math.random() * 30 + 10).toFixed(0) + "%.",
+                "Salinity measurements show " + (Math.random() * 5 + 33).toFixed(1) + " ppt in the affected area.",
+                "Temperature gradients indicate a variation of " + (Math.random() * 10 + 2).toFixed(1) + "°C across the zone.",
+                "Sonar returns suggest an object density of " + (Math.random() * 5 + 1).toFixed(2) + " g/cm³.",
+                "The bioluminescent signature matches known species with " + (Math.random() * 90 + 5).toFixed(0) + "% confidence."
+            ];
+            
+            const randomFact = [
+                "Did you know the pressure at Challenger Deep is equivalent to an elephant standing on a postage stamp?",
+                "Fun fact: The deep sea is the largest habitat on Earth, yet less than 5% has been explored.",
+                "Interesting note: Some deep sea creatures can live for centuries due to slow metabolisms.",
+                "FYI: The average depth of the ocean is about 3,688 meters (12,100 feet).",
+                "Trivia: Hydrothermal vents can reach temperatures of 400°C (750°F) but don't boil due to extreme pressure."
+            ];
+            
+            let response;
+            const persona = state.currentPersona;
+            const formality = state.formality;
+            const technicality = state.technicality;
+            
+            // Base response from persona
+            const personaOptions = personaResponses[persona] || personaResponses.cousteau;
+            response = personaOptions[Math.floor(Math.random() * personaOptions.length)];
+            
+            // Add technical details based on slider
+            if (technicality > 70) {
+                response += " " + technicalDetails[Math.floor(Math.random() * technicalDetails.length)];
+            } else if (technicality < 30) {
+                response += " " + randomFact[Math.floor(Math.random() * randomFact.length)];
+            }
+            
+            // Adjust formality
+            if (formality < 30) {
+                response = response.replace(/\./g, "!");
+                response = response.replace(/\b(I|My)\b/g, match => match.toLowerCase());
+                response = response.replace(/\b(you)\b/g, "ya");
+                response += " Pretty wild, huh?";
+            } else if (formality > 70) {
+                response = "According to established marine research protocols and standardized observation methodologies, " + 
+                          response.charAt(0).toLowerCase() + response.slice(1);
+                response = response.replace(/\b(is)\b/g, "has been observed to be");
+            }
+            
+            return response;
+        }
+        
+        // Screenshot functionality
+        document.getElementById('screenshotBtn').addEventListener('click', () => {
+            document.getElementById('screenshotUpload').click();
+        });
+        
+        document.getElementById('screenshotUpload').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const chatWindow = document.getElementById('chatWindow');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    userMessage.innerHTML = `
+                        <div class="timestamp">USER | ${new Date().toLocaleTimeString()}</div>
+                        <p>Uploaded sonar/screenshot analysis request</p>
+                        <img src="${event.target.result}" style="max-width: 100%; margin-top: 10px; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                    `;
+                    chatWindow.appendChild(userMessage);
+                    
+                    // Update depth
+                    state.currentDepth = getRandomDepth();
+                    updateDepthDisplay();
+                    
+                    // Simulate bot analysis
+                    setTimeout(() => {
+                        const botMessage = document.createElement('div');
+                        botMessage.className = 'message bot-message';
+                        botMessage.innerHTML = `
+                            <div class="timestamp">SONAR ANALYSIS MODULE | ${new Date().toLocaleTimeString()} | Depth: ${state.currentDepth}</div>
+                            <p>Image processed with deep sea pattern recognition. Detecting:</p>
+                            <ul>
+                                <li>${['Possible hydrothermal vent signatures', 'Unidentified biological mass', 'Geological fault line', 'ROV shadow artifact'][Math.floor(Math.random() * 4)]}</li>
+                                <li>${['Sediment disturbance patterns', 'Current flow markers', 'Thermal gradients', 'Pressure wave reflections'][Math.floor(Math.random() * 4)]}</li>
+                                <li>${['Bathymetric anomalies', 'Possible wreckage', 'Mineral deposits', 'Gas seepage'][Math.floor(Math.random() * 4)]}</li>
+                            </ul>
+                            <p>Recommend ROV deployment for closer inspection.</p>
+                            <p class="warning">${Math.random() > 0.7 ? 'WARNING: POTENTIAL HAZARD DETECTED IN SECTOR' : 'No immediate threats detected'}</p>
+                        `;
+                        chatWindow.appendChild(botMessage);
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        
+                        // Add to session history
+                        state.sessionHistory.push({
+                            type: 'image_analysis',
+                            image: event.target.result,
+                            analysis: botMessage.innerHTML,
+                            timestamp: new Date().toISOString(),
+                            depth: state.currentDepth
+                        });
+                    }, 1500);
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Personality selector
+        document.getElementById('personaSelect').addEventListener('change', function() {
+            state.currentPersona = this.value;
+            addSystemMessage(`Persona changed to ${this.options[this.selectedIndex].text}`);
+        });
+        
+        // Sliders
+        document.getElementById('formalitySlider').addEventListener('input', function() {
+            state.formality = this.value;
+        });
+        
+        document.getElementById('technicalSlider').addEventListener('input', function() {
+            state.technicality = this.value;
+        });
+        
+        document.getElementById('urgencySlider').addEventListener('input', function() {
+            state.urgency = this.value;
+        });
+        
+        // Tool buttons
+        document.getElementById('sonarBtn').addEventListener('click', function() {
+            activateTool('Sonar Analysis', `
+                <h3>Active Sonar Scan</h3>
+                <div class="progress-bar"><div class="progress-fill" id="sonarProgress"></div></div>
+                <div id="sonarResults"></div>
+            `);
+            
+            simulateProgress('sonarProgress', 'sonarResults', [
+                "Initializing piezoelectric transducers...",
+                "Calibrating for current salinity: 34.5 ppt...",
+                "Pinging at ${Math.floor(Math.random() * 50 + 30)} kHz...",
+                "Processing returns...",
+                "Generating bathymetric profile..."
+            ], "Sonar scan complete. Detecting:", [
+                "Seafloor at ${Math.floor(Math.random() * 5000) + 1000}m depth",
+                "${Math.random() > 0.5 ? 'Possible' : 'Confirmed'} biological target at ${Math.floor(Math.random() * 4000) + 500}m range",
+                "Thermocline layer at ${Math.floor(Math.random() * 800) + 200}m",
+                "${Math.random() > 0.7 ? 'Potential wreckage' : 'Geological feature'} at bearing ${Math.floor(Math.random() * 360)}°"
+            ]);
+        });
+        
+        document.getElementById('pressureBtn').addEventListener('click', function() {
+            activateTool('Pressure Calculator', `
+                <h3>Depth-Pressure Conversion</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="depthInput">Depth (meters):</label>
+                    <input type="number" id="depthInput" style="width: 100%; padding: 8px; background-color: rgba(0, 30, 60, 0.7); color: white; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                </div>
+                <button id="calculatePressureBtn" class="feature-btn">Calculate Pressure</button>
+                <div id="pressureResults" style="margin-top: 15px;"></div>
+            `);
+            
+            document.getElementById('calculatePressureBtn').addEventListener('click', function() {
+                const depth = parseFloat(document.getElementById('depthInput').value);
+                if (!isNaN(depth) && depth >= 0) {
+                    const pressure = (depth * 0.1004).toFixed(2); // 1m = 0.1004 bar
+                    const psi = (depth * 1.45038).toFixed(2);
+                    document.getElementById('pressureResults').innerHTML = `
+                        <p>At ${depth}m depth:</p>
+                        <ul>
+                            <li>${pressure} bar</li>
+                            <li>${psi} psi</li>
+                            <li>${(pressure / 1.01325).toFixed(1)} atm</li>
+                        </ul>
+                        <p>${depth > 6000 ? '<span class="warning">WARNING: HADAL ZONE - EXTREME PRESSURE</span>' : ''}</p>
+                    `;
+                } else {
+                    document.getElementById('pressureResults').innerHTML = '<p class="warning">Please enter a valid depth</p>';
+                }
+            });
+        });
+        
+        document.getElementById('speciesBtn').addEventListener('click', function() {
+            activateTool('Species Identification', `
+                <h3>Deep Sea Species Database</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="speciesSearch">Search:</label>
+                    <input type="text" id="speciesSearch" placeholder="Enter species name or characteristics" style="width: 100%; padding: 8px; background-color: rgba(0, 30, 60, 0.7); color: white; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                </div>
+                <button id="searchSpeciesBtn" class="feature-btn">Search</button>
+                <div id="speciesResults" style="margin-top: 15px;"></div>
+            `);
+            
+            // Display all species initially
+            displaySpecies(state.marineSpecies);
+            
+            document.getElementById('searchSpeciesBtn').addEventListener('click', function() {
+                const query = document.getElementById('speciesSearch').value.toLowerCase();
+                if (query) {
+                    const results = state.marineSpecies.filter(species => 
+                        species.name.toLowerCase().includes(query) || 
+                        species.scientific.toLowerCase().includes(query) ||
+                        species.fact.toLowerCase().includes(query)
+                    );
+                    displaySpecies(results);
+                } else {
+                    displaySpecies(state.marineSpecies);
+                }
+            });
+        });
+        
+        function displaySpecies(speciesList) {
+            const container = document.getElementById('speciesResults');
+            container.innerHTML = '';
+            
+            if (speciesList.length === 0) {
+                container.innerHTML = '<p>No species found matching your query</p>';
+                return;
+            }
+            
+            speciesList.forEach(species => {
+                const card = document.createElement('div');
+                card.className = 'flashcard';
+                card.innerHTML = `
+                    <h3>${species.name} (${species.scientific})</h3>
+                    <p><strong>Depth Range:</strong> ${species.depth}</p>
+                    <p><strong>Size:</strong> ${species.size}</p>
+                    <p><strong>Interesting Fact:</strong> ${species.fact}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        document.getElementById('equipmentBtn').addEventListener('click', function() {
+            activateTool('Equipment Checklist', `
+                <h3>Deep Sea Expedition Checklist</h3>
+                <div id="equipmentList">
+                    <div class="flashcard">
+                        <h3>Standard ROV Package</h3>
+                        <ul>
+                            <li><input type="checkbox"> High-definition cameras (minimum 4K)</li>
+                            <li><input type="checkbox"> Manipulator arms (2x)</li>
+                            <li><input type="checkbox"> Sonar system (multibeam)</li>
+                            <li><input type="checkbox"> Sample containers (biologically inert)</li>
+                            <li><input type="checkbox"> CTD profiler</li>
+                            <li><input type="checkbox"> Emergency buoyancy release</li>
+                        </ul>
+                    </div>
+                    <div class="flashcard">
+                        <h3>Hadal Zone Additions</h3>
+                        <ul>
+                            <li><input type="checkbox"> Titanium pressure housing</li>
+                            <li><input type="checkbox"> Redundant thrusters</li>
+                            <li><input type="checkbox"> Extra lighting (10,000+ lumens)</li>
+                            <li><input type="checkbox"> Emergency transponder</li>
+                        </ul>
+                    </div>
+                </div>
+                <button id="saveChecklistBtn" class="feature-btn">Save Checklist</button>
+            `);
+        });
+        
+        document.getElementById('diveBtn').addEventListener('click', function() {
+            activateTool('Dive Planning', `
+                <h3>Dive Plan Generator</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="diveDepth">Target Depth (meters):</label>
+                    <input type="number" id="diveDepth" style="width: 100%; padding: 8px; background-color: rgba(0, 30, 60, 0.7); color: white; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="diveDuration">Duration (minutes):</label>
+                    <input type="number" id="diveDuration" style="width: 100%; padding: 8px; background-color: rgba(0, 30, 60, 0.7); color: white; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                </div>
+                <button id="generateDivePlanBtn" class="feature-btn">Generate Plan</button>
+                <div id="divePlanResults" style="margin-top: 15px;"></div>
+            `);
+            
+            document.getElementById('generateDivePlanBtn').addEventListener('click', function() {
+                const depth = parseFloat(document.getElementById('diveDepth').value);
+                const duration = parseFloat(document.getElementById('diveDuration').value);
+                
+                if (!isNaN(depth) && !isNaN(duration) && depth > 0 && duration > 0) {
+                    let decompression = "No decompression required";
+                    let gasMix = "Standard Nitrox 32";
+                    let equipment = "Standard SCUBA gear";
+                    let warnings = [];
+                    
+                    if (depth > 40) {
+                        decompression = `${Math.floor(depth / 10)} decompression stops required`;
+                        gasMix = "Trimix recommended (He/O₂/N₂)";
+                    }
+                    
+                    if (depth > 60) {
+                        equipment = "Technical diving gear required";
+                        warnings.push("WARNING: Beyond recreational dive limits");
+                    }
+                    
+                    if (depth > 100) {
+                        equipment = "Closed-circuit rebreather mandatory";
+                        gasMix = "Custom gas mix required";
+                        warnings.push("DANGER: Requires specialized training and equipment");
+                    }
+                    
+                    let planHTML = `
+                        <div class="flashcard">
+                            <h3>Dive Plan Summary</h3>
+                            <p><strong>Target Depth:</strong> ${depth}m</p>
+                            <p><strong>Duration:</strong> ${duration} minutes</p>
+                            <p><strong>Gas Mix:</strong> ${gasMix}</p>
+                            <p><strong>Equipment:</strong> ${equipment}</p>
+                            <p><strong>Decompression:</strong> ${decompression}</p>
+                            ${warnings.length > 0 ? `<p class="warning">${warnings.join('<br>')}</p>` : ''}
+                        </div>
+                    `;
+                    
+                    document.getElementById('divePlanResults').innerHTML = planHTML;
+                } else {
+                    document.getElementById('divePlanResults').innerHTML = '<p class="warning">Please enter valid depth and duration</p>';
+                }
+            });
+        });
+        
+        document.getElementById('bathymetryBtn').addEventListener('click', function() {
+            activateTool('Bathymetry Data', `
+                <h3>Seafloor Topography Analysis</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="bathyRegion">Region:</label>
+                    <select id="bathyRegion" style="width: 100%; padding: 8px; background-color: rgba(0, 30, 60, 0.7); color: white; border: 1px solid var(--biolum-green); border-radius: 3px;">
+                        <option>Mariana Trench</option>
+                        <option>Mid-Atlantic Ridge</option>
+                        <option>Pacific Abyssal Plain</option>
+                        <option>Java Trench</option>
+                        <option>Hawaiian Seamounts</option>
+                    </select>
+                </div>
+                <button id="loadBathymetryBtn" class="feature-btn">Load Data</button>
+                <div id="bathymetryResults" style="margin-top: 15px;"></div>
+            `);
+            
+            document.getElementById('loadBathymetryBtn').addEventListener('click', function() {
+                const region = document.getElementById('bathyRegion').value;
+                const regions = {
+                    "Mariana Trench": {
+                        maxDepth: 10984,
+                        avgDepth: 5000,
+                        features: ["Challenger Deep", "Sirena Deep", "Numerous seamounts"]
+                    },
+                    "Mid-Atlantic Ridge": {
+                        maxDepth: 4000,
+                        avgDepth: 2500,
+                        features: ["Hydrothermal vents", "Transform faults", "Volcanic activity"]
+                    },
+                    "Pacific Abyssal Plain": {
+                        maxDepth: 6000,
+                        avgDepth: 4000,
+                        features: ["Flat sediment plains", "Occasional seamounts"]
+                    },
+                    "Java Trench": {
+                        maxDepth: 7725,
+                        avgDepth: 4000,
+                        features: ["Subduction zone", "Earthquake activity"]
+                    },
+                    "Hawaiian Seamounts": {
+                        maxDepth: 5000,
+                        avgDepth: 3000,
+                        features: ["Guyots", "Volcanic cones", "Coral atolls"]
+                    }
+                };
+                
+                const data = regions[region];
+                document.getElementById('bathymetryResults').innerHTML = `
+                    <div class="flashcard">
+                        <h3>${region} Bathymetry</h3>
+                        <p><strong>Maximum Depth:</strong> ${data.maxDepth}m</p>
+                        <p><strong>Average Depth:</strong> ${data.avgDepth}m</p>
+                        <p><strong>Notable Features:</strong></p>
+                        <ul>
+                            ${data.features.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                        <div style="margin-top: 15px; height: 150px; background: linear-gradient(to bottom, 
+                            #00f ${100 - (data.maxDepth/10984 * 100)}%, 
+                            #005 0%, 
+                            #005 ${100 - (data.avgDepth/10984 * 100)}%, 
+                            #000 0%); 
+                            border: 1px solid var(--biolum-green);">
+                            <div style="position: relative; top: 50%; transform: translateY(-50%); text-align: center;">
+                                Depth Profile Visualization
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+        
+        // Quick access buttons
+        document.getElementById('hadalBtn').addEventListener('click', function() {
+            addSystemMessage("Loading Hadal Zone protocols...");
+            setTimeout(() => {
+                addBotMessage(`
+                    <h3>Hadal Zone Expedition Protocols</h3>
+                    <p>Working below 6,000m requires special considerations:</p>
+                    <ol>
+                        <li><strong>Equipment:</strong> All gear must be rated for at least 1,100 bar pressure</li>
+                        <li><strong>ROV Operations:</strong> Double redundancy on all critical systems</li>
+                        <li><strong>Time Management:</strong> Account for extended transit times to extreme depths</li>
+                        <li><strong>Safety:</strong> Emergency ascent protocols must account for potential equipment failure under extreme pressure</li>
+                        <li><strong>Documentation:</strong> Detailed logs of all pressure-related equipment performance</li>
+                    </ol>
+                    <p class="warning">WARNING: Hadal zone operations have inherent risks not present in shallower dives.</p>
+                `);
+            }, 800);
+        });
+        
+        document.getElementById('submersibleBtn').addEventListener('click', function() {
+            addSystemMessage("Accessing submersible specifications database...");
+            setTimeout(() => {
+                addBotMessage(`
+                    <h3>Deep Sea Submersible Specifications</h3>
+                    <div class="data-table">
+                        <table>
+                            <tr>
+                                <th>Model</th>
+                                <th>Max Depth</th>
+                                <th>Occupants</th>
+                                <th>Features</th>
+                            </tr>
+                            <tr>
+                                <td>Alvin</td>
+                                <td>4,500m</td>
+                                <td>3</td>
+                                <td>2 manipulators, sample basket</td>
+                            </tr>
+                            <tr>
+                                <td>DSV Limiting Factor</td>
+                                <td>11,000m</td>
+                                <td>2</td>
+                                <td>Full ocean depth, 96h life support</td>
+                            </tr>
+                            <tr>
+                                <td>Nautile</td>
+                                <td>6,000m</td>
+                                <td>3</td>
+                                <td>5 thrusters, 360° visibility</td>
+                            </tr>
+                            <tr>
+                                <td>Shinkai 6500</td>
+                                <td>6,500m</td>
+                                <td>3</td>
+                                <td>Advanced sampling systems</td>
+                            </tr>
+                        </table>
+                    </div>
+                `);
+            }, 800);
+        });
+        
+        document.getElementById('marineLifeBtn').addEventListener('click', function() {
+            activateTool('Marine Life Database', `
+                <h3>Deep Sea Species Catalog</h3>
+                <div id="marineLifeResults" style="margin-top: 15px;">
+                    ${state.marineSpecies.map(species => `
+                        <div class="flashcard">
+                            <h3>${species.name} (${species.scientific})</h3>
+                            <p><strong>Depth Range:</strong> ${species.depth}</p>
+                            <p><strong>Size:</strong> ${species.size}</p>
+                            <p><strong>Interesting Fact:</strong> ${species.fact}</p>
+                        </div>
+                    `).join('')}
+                </div>
+                <button id="addSpeciesBtn" class="feature-btn">Add New Species</button>
+            `);
+            
+            document.getElementById('addSpeciesBtn').addEventListener('click', function() {
+                const newSpecies = {
+                    name: `New Species ${state.marineSpecies.length + 1}`,
+                    scientific: "Unknown",
+                    depth: "0-0m",
+                    size: "Unknown",
+                    fact: "No data available"
+                };
+                state.marineSpecies.unshift(newSpecies);
+                
+                document.getElementById('marineLifeResults').innerHTML = `
+                    <div class="flashcard">
+                        <h3 contenteditable="true">${newSpecies.name}</h3>
+                        <p><strong>Scientific Name:</strong> <span contenteditable="true">${newSpecies.scientific}</span></p>
+                        <p><strong>Depth Range:</strong> <span contenteditable="true">${newSpecies.depth}</span></p>
+                        <p><strong>Size:</strong> <span contenteditable="true">${newSpecies.size}</span></p>
+                        <p><strong>Interesting Fact:</strong> <span contenteditable="true">${newSpecies.fact}</span></p>
+                    </div>
+                    ${document.getElementById('marineLifeResults').innerHTML}
+                `;
+            });
+        });
+        
+        document.getElementById('emergencyBtn').addEventListener('click', function() {
+            addSystemMessage("EMERGENCY PROTOCOLS ACTIVATED");
+            setTimeout(() => {
+                addBotMessage(`
+                    <h3 class="warning">EMERGENCY PROCEDURES</h3>
+                    <ol>
+                        <li><strong>ROV Loss:</strong> Initiate search pattern, activate emergency transponder</li>
+                        <li><strong>Pressure Hull Breach:</strong> Immediate ascent, seal affected compartments</li>
+                        <li><strong>Power Failure:</strong> Switch to backup batteries, shed non-essential loads</li>
+                        <li><strong>Entanglement:</strong> Stop all thrusters, use manipulators to carefully free vehicle</li>
+                        <li><strong>Medical Emergency:</strong> Follow depth-specific decompression protocols</li>
+                    </ol>
+                    <p class="warning">IN CASE OF IMMINENT DANGER: Activate emergency buoyancy release and abort mission.</p>
+                    <button class="feature-btn" style="background-color: var(--warning-red);">SIMULATE EMERGENCY DRILL</button>
+                `);
+            }, 300);
+        });
+        
+        document.getElementById('mentalHealthBtn').addEventListener('click', function() {
+            addSystemMessage("Activating mental health support protocols...");
+            setTimeout(() => {
+                addBotMessage(`
+                    <h3>Mental Health Check-In</h3>
+                    <p>Deep sea exploration can be isolating and stressful. How are you feeling today?</p>
+                    <div style="margin: 15px 0;">
+                        <button class="feature-btn" style="background-color: #4CAF50; margin-right: 10px;">I'm doing well</button>
+                        <button class="feature-btn" style="background-color: #FFC107;">I'm stressed</button>
+                        <button class="feature-btn" style="background-color: #F44336;">I need help</button>
+                    </div>
+                    <p>Remember: It's normal to feel overwhelmed during extended deep sea missions. The system can:</p>
+                    <ul>
+                        <li>Connect you with support resources</li>
+                        <li>Guide you through breathing exercises</li>
+                        <li>Adjust workload if needed</li>
+                    </ul>
+                    <p>Your well-being is critical to mission success.</p>
+                `);
+            }, 800);
+        });
+        
+        // History buttons
+        document.getElementById('viewSession12').addEventListener('click', function() {
+            const session = state.expeditions.find(e => e.id === 12);
+            viewExpeditionDetails(session);
+        });
+        
+        document.getElementById('viewSession11').addEventListener('click', function() {
+            const session = state.expeditions.find(e => e.id === 11);
+            viewExpeditionDetails(session);
+        });
+        
+        document.getElementById('loadMoreHistory').addEventListener('click', function() {
+            addSystemMessage("Loading additional expedition history...");
+            setTimeout(() => {
+                state.expeditions.push({
+                    id: 10,
+                    date: "2023-09-10",
+                    location: "Puerto Rico Trench",
+                    focus: "Deep sea coral ecosystems",
+                    discoveries: [
+                        "Previously unknown coral species at 5,000m depth",
+                        "Evidence of coral bleaching at depth",
+                        "Unusual symbiotic relationships"
+                    ],
+                    notes: "Extended mission due to interesting findings"
+                });
+                
+                const historyContent = document.getElementById('historyContent');
+                const newCard = document.createElement('div');
+                newCard.className = 'flashcard';
+                newCard.innerHTML = `
+                    <h3>Session 10: Deep Sea Corals</h3>
+                    <p>2023-09-10 | Focus: Coral ecosystems in trench environment</p>
+                    <p>Discoveries: New coral species at extreme depth</p>
+                    <button class="feature-btn" style="margin-top: 10px;">View Details</button>
+                `;
+                historyContent.insertBefore(newCard, this);
+                
+                newCard.querySelector('button').addEventListener('click', function() {
+                    viewExpeditionDetails(state.expeditions.find(e => e.id === 10));
+                });
+            }, 1200);
+        });
+        
+        function viewExpeditionDetails(session) {
+            const chatWindow = document.getElementById('chatWindow');
+            const message = document.createElement('div');
+            message.className = 'message bot-message';
+            message.innerHTML = `
+                <div class="timestamp">EXPEDITION ARCHIVES | ${session.date}</div>
+                <h3>Session ${session.id}: ${session.focus}</h3>
+                <p><strong>Location:</strong> ${session.location}</p>
+                <p><strong>Focus:</strong> ${session.focus}</p>
+                <p><strong>Key Discoveries:</strong></p>
+                <ul>
+                    ${session.discoveries.map(d => `<li>${d}</li>`).join('')}
+                </ul>
+                <p><strong>Notes:</strong> ${session.notes}</p>
+            `;
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            // Switch to chat tab
+            document.querySelector('.tab[data-tab="chat"]').click();
+        }
+        
+        // Utility functions
+        function activateTool(toolName, content) {
+            document.getElementById('activeToolOutput').innerHTML = `
+                <div class="tool-output">
+                    ${content}
+                </div>
+            `;
+            addSystemMessage(`${toolName} tool activated`);
+            document.querySelector('.tab[data-tab="tools"]').click();
+        }
+        
+        function simulateProgress(progressBarId, resultsId, steps, finalTitle, finalItems) {
+            const progressBar = document.getElementById(progressBarId);
+            const resultsDiv = document.getElementById(resultsId);
+            resultsDiv.innerHTML = '';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10 + 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Show final results
+                    setTimeout(() => {
+                        resultsDiv.innerHTML = `
+                            <p><strong>${finalTitle}</strong></p>
+                            <ul>
+                                ${finalItems.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        `;
+                    }, 500);
+                }
+                
+                progressBar.style.width = `${progress}%`;
+                
+                // Show random step if progress is at certain points
+                if (progress % 30 < 5 && progress < 95 && steps.length > 0) {
+                    const randomStep = steps.splice(Math.floor(Math.random() * steps.length), 1)[0];
+                    resultsDiv.innerHTML += `<p>${randomStep.replace('${Math.floor(Math.random() * 50 + 30)}', Math.floor(Math.random() * 50 + 30))}</p>`;
+                }
+            }, 200);
+        }
+        
+        function addSystemMessage(text) {
+            const chatWindow = document.getElementById('chatWindow');
+            const message = document.createElement('div');
+            message.className = 'message bot-message';
+            message.innerHTML = `
+                <div class="timestamp">SYSTEM NOTIFICATION | ${new Date().toLocaleTimeString()}</div>
+                <p>${text}</p>
+            `;
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        function addBotMessage(html) {
+            const chatWindow = document.getElementById('chatWindow');
+            const message = document.createElement('div');
+            message.className = 'message bot-message';
+            message.innerHTML = `
+                <div class="timestamp">DEEP SEA ASSISTANT | ${new Date().toLocaleTimeString()} | Depth: ${getRandomDepth()}</div>
+                ${html}
+            `;
+            chatWindow.appendChild(message);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        // Initialize
+        updateDepthDisplay();
+    </script>
+</body>
+</html>
